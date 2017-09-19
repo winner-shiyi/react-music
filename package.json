@@ -1,27 +1,26 @@
 {
-  "name": "react-music",
+  "name": "react-music-player",
   "version": "1.0.0",
-  "description": "music player build by react weina",
-  "main": "app/index.js",
+  "description": "music player build with react, redux and react-router with the help of webpack.",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/winner-shiyi/react-music.git"
+    "test": "",
+    "start": "node server",
+    "build": "webpack --config ./webpack.production.config.js --progress --profile --colors",
+    "eslint": "eslint ."
   },
   "keywords": [
-    "webpack",
+    "es6",
     "react",
-    "music"
+    "redux"
   ],
   "author": "weina",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/winner-shiyi/react-music/issues"
-  },
-  "homepage": "https://github.com/winner-shiyi/react-music#readme",
-    "dependencies": {
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/winner-shiyi/react-music.git"
+  },  
+  "dependencies": {
     "pubsub-js": "^1.5.4",
     "react": "^15.0.2",
     "react-dom": "^15.0.2",
