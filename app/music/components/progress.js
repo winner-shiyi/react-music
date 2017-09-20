@@ -7,7 +7,7 @@ export default class Progress extends React.Component {
     render() {
         return (
             <div className="row components-progress">
-        		{this.props.progress}秒
+                <div className="progress" style={{ width: `${this.props.progress}%` }}></div>
         	</div>
         );
     }
