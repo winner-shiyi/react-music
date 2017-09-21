@@ -2,6 +2,7 @@ import React from 'react';
 import Header from './components/header';
 import Progress from './components/Progress';
 
+let duration = null; // 当前音频的总时间
 export default class Root extends React.Component {
     constructor(props) {
         super(props);
@@ -20,6 +21,7 @@ export default class Root extends React.Component {
             wmode: 'window'
         });
         $('#player').bind($.jPlayer.event.timeupdate, (e) => {
+            duration = e.jPlayer.status.duration; // 获取总时长
             this.setState({
                 progress: Math.round(e.jPlayer.status.currentPercentAbsolute)
             });
@@ -27,13 +29,21 @@ export default class Root extends React.Component {
     }
     // 不会有重复绑定的问题
     componentWillUnMount() {
-        $('#jPlayer').unbind($.jPlayer.event.timeupdate);
+        $('#player').unbind($.jPlayer.event.timeupdate);
+    }
+
+    progressChangeHandler(progress) {
+        $('#player').jPlayer('play', duration * progress);
     }
     render() {
         return (
             <div>
                 <Header></Header>
-                <Progress progress={this.state.progress}></Progress>
+                <Progress 
+                progress={this.state.progress}
+                onProgressChange={this.progressChangeHandler.bind(this)}
+                barColor="#ca71da"
+                ></Progress>
             </div>
             
         );
