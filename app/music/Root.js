@@ -1,15 +1,17 @@
 import React from 'react';
 import Header from './components/header';
-import Progress from './components/Progress';
+import Player from './page/Player';
+import { MUSIC_LIST }  from './config/musiclist'
 
-let duration = null; // 当前音频的总时间
+
 export default class Root extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            progress:'-',
+           currentMusicItem: MUSIC_LIST[0] 
         }
     }
+    // 在root 中 初始化player，保证页面切换的时候音乐不会中断
     componentDidMount() {
         $('#player').jPlayer({
             ready: function() {
@@ -20,32 +22,14 @@ export default class Root extends React.Component {
             supplied: 'mp3',
             wmode: 'window'
         });
-        $('#player').bind($.jPlayer.event.timeupdate, (e) => {
-            duration = e.jPlayer.status.duration; // 获取总时长
-            this.setState({
-                progress: Math.round(e.jPlayer.status.currentPercentAbsolute)
-            });
-        });
-    }
-    // 不会有重复绑定的问题
-    componentWillUnMount() {
-        $('#player').unbind($.jPlayer.event.timeupdate);
-    }
-
-    progressChangeHandler(progress) {
-        $('#player').jPlayer('play', duration * progress);
+        
     }
     render() {
         return (
             <div>
-                <Header></Header>
-                <Progress 
-                progress={this.state.progress}
-                onProgressChange={this.progressChangeHandler.bind(this)}
-                barColor="#ca71da"
-                ></Progress>
+                <Header/>
+                <Player currentMusicItem={this.state.currentMusicItem}></Player>
             </div>
-            
-        );
+        )
     }
 }
