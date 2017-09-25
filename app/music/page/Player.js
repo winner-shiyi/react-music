@@ -1,6 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router';
 import Progress from '../components/Progress';
 import './player.less';
+
 
 let duration = null; // 当前音频的总时间
 export default class Play extends React.Component{
@@ -57,7 +59,7 @@ export default class Play extends React.Component{
         
         return (
             <div className="player-page">
-                <h1 className="caption">我的私人音乐坊 &gt;</h1>
+                <h1 className="caption"><Link to="/list">我的私人音乐坊 &gt;</Link></h1>
                 <div className="mt20 row">
                 	<div className="controll-wrapper">
                 		<h2 className="music-title">{title}</h2>
