@@ -5,13 +5,85 @@ import Player from './page/Player';
 import { MUSIC_LIST }  from './config/musiclist';
 import List from './page/list';
 import Pubsub from 'pubsub-js'; // 事件订阅的管理器
+import { randomRange } from './utils/util';
 
 class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             musicList: MUSIC_LIST,
-           currentMusicItem: MUSIC_LIST[0] 
+            currentMusicItem: {},
+            repeatType: 'cycle' 
+        }
+    }
+    // 在root 中 初始化player，保证页面切换的时候音乐不会中断
+    componentDidMount() {
+        // 初始化音乐播放器
+        $('#player').jPlayer({
+            supplied: 'mp3',
+            wmode: 'window'
+        });
+
+        // 调用音乐播放器
+        this.playMusic(this.state.musicList[0]);
+
+        // 监听当前音乐播放进度，播放完毕之后需要事件回调
+        $('#player').bind($.jPlayer.event.ended, (e) => {
+            this.playWhenEnd();
+        });
+
+        // 设置一个订阅器
+        Pubsub.subscribe('DELETE_MUSIC', (msg, musicItem) => { //msg 是pubsub传过来的消息参数，第二个参数是我们传入的参数
+            this.setState({
+                musicList: this.state.musicList.filter(item => {
+                    return item !== musicItem;
+                })
+            });
+        });
+        Pubsub.subscribe('PLAY_MUSIC', (msg, musicItem) => {
+            this.playMusic(musicItem);
+        });
+
+        Pubsub.subscribe('PLAY_PREV', () => {
+            this.playNext('prev');
+        });
+        Pubsub.subscribe('PLAY_NEXT', () => {
+            this.playNext();
+        });
+
+        const repeatList = [
+            'cycle',
+            'once',
+            'random'
+        ];
+        Pubsub.subscribe('CHANAGE_REPEAT', () => {
+            let index = repeatList.indexOf(this.state.repeatType);
+            index = (index + 1) % repeatList.length;
+            this.setState({
+                repeatType: repeatList[index]
+            });
+        });
+    }
+    componentWillUnMount() {
+        PubSub.unsubscribe('DELETE_MUSIC');
+        PubSub.unsubscribe('PLAY_MUSIC');
+        PubSub.unsubscribe('PLAY_PREV');
+        PubSub.unsubscribe('PLAY_NEXT');
+        PubSub.unsubscribe('CHANAGE_REPEAT');
+        $('#player').unbind($.jPlayer.event.ended);
+    }
+    playWhenEnd() {
+        if (this.state.repeatType === 'random') {
+            let index = this.findMusicIndex(this.state.currentMusicItem);
+            let randomIndex = randomRange(0, this.state.musicList.length - 1);
+            while(randomIndex === index) {
+               randomIndex = randomRange(0, this.state.musicList.length - 1); 
+            }
+            this.playMusic(this.state.musicList[randomIndex]);
+        } else if (this.state.repeatType === 'once') {
+            this.playMusic(this.state.currentMusicItem);
+        } else {
+            this.playNext();
         }
     }
     // 把音乐播放的逻辑单独拎出来，可以多处复用
@@ -38,40 +110,6 @@ class App extends React.Component {
     }
     findMusicIndex(musicItem) {
         return this.state.musicList.indexOf(musicItem);
-    }
-    // 在root 中 初始化player，保证页面切换的时候音乐不会中断
-    componentDidMount() {
-        // 初始化音乐播放器
-        $('#player').jPlayer({
-            supplied: 'mp3',
-            wmode: 'window'
-        });
-
-        // 调用音乐播放器
-        this.playMusic(this.state.currentMusicItem);
-
-        // 监听当前音乐播放进度，播放完毕之后需要事件回调
-        $('#player').bind($.jPlayer.event.ended, (e) => {
-            this.playNext();
-        });
-
-        // 设置一个订阅器
-        Pubsub.subscribe('DELETE_MUSIC', (msg, musicItem) => { //msg 是pubsub传过来的消息参数，第二个参数是我们传入的参数
-            this.setState({
-                musicList: this.state.musicList.filter(item => {
-                    return item !== musicItem;
-                })
-            });
-        });
-        Pubsub.subscribe('PLAY_MUSIC', (msg, musicItem) => {
-            this.playMusic(musicItem);
-        });
-        
-    }
-    componentWillUnMount() {
-        PubSub.unsubscribe('DELETE_MUSIC');
-        PubSub.unsubscribe('PLAY_MUSIC');
-        $('#player').unbind($.jPlayer.event.ended);
     }
     render() {
         return (
